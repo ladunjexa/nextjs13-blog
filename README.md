@@ -121,35 +121,30 @@ Nextblog includes Home page, Dynamic Categories & Blogposts pages.
 
 For example, Here is `getPostDetails` function
 ```javascript
-export const getPostDetails = async (slug) => {
+export const getSimilarPosts = async (categories, slug) => {
   const query = gql`
-    query GetPostDetails($slug: String!) {
-      post(where: { slug: $slug }) {
-        author {
-          bio
-          id
-          name
-          photo {
-            url
-          }
+    query GetPostDetails($slug: String!, $categories: [String!]) {
+      posts(
+        where: {
+          slug_not: $slug
+          AND: { categories_some: { slug_in: $categories } }
         }
-        createdAt
-        slug
+        last: 3
+      ) {
         title
-        excerpt
         featuredImage {
           url
         }
-        categories {
-          name
-          slug
-        }
-        content {
-          raw
-        }
+        createdAt
+        slug
       }
     }
   `;
+
+  const result = await request(graphqlAPI, query, { categories, slug });
+
+  return result.posts;
+};
   ```
   
 ### styles
